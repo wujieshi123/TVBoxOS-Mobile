@@ -162,7 +162,7 @@ dependencies {
     implementation project(":TabLayout")
     implementation project(':ViewPager1Delegate')
     //TabLayout的非kt项目需要依赖这个包实现点击事件等
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31"
     //展开收缩tv
     implementation 'com.github.MZCretin:ExpandableTextView:v1.6.1-x'
     //lottie动画
