@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
-    compileSdkVersion 33
+    compileSdk 33
 
     defaultConfig {
         applicationId 'com.github.tvbox.osc'
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 31
-        versionName '1.1.1'
+        versionCode 29
+        versionName '1.0.9'
         multiDexEnabled true
         //设置room的Schema的位置
         javaCompileOptions {
@@ -25,6 +25,7 @@ android {
 
     }
 
+
     // 执行配置
     applicationVariants.all { variant ->
 
@@ -38,27 +39,33 @@ android {
         }
     }
 
+
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
     }
 
     signingConfigs {
         config {
-            keyAlias 'TVBoxOSC'
-            keyPassword 'TVBoxOSC'
-            storeFile file('..\\TVBoxOSC.jks')
-            storePassword 'TVBoxOSC'
+            keyAlias 'key0'
+            keyPassword '123456'
+            storeFile file('test.jks')
+            storePassword '123456'
+            v1SigningEnabled true
+            v2SigningEnabled true
         }
     }
+
 
     buildTypes {
         debug {
             signingConfig signingConfigs.config
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled false
         }
-
         release {
             signingConfig signingConfigs.config
-            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled true
         }
     }
 
@@ -113,7 +120,7 @@ dependencies {
     implementation 'com.kingja.loadsir:loadsir:1.3.8'
     implementation 'com.google.code.gson:gson:2.8.7'
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'com.github.JessYanCoding:AndroidAutoSize:v1.2.1'
+    implementation 'me.jessyan:autosize:1.2.1'
     implementation('com.thoughtworks.xstream:xstream:1.4.15') {
         exclude group: 'xmlpull', module: 'xmlpull'
     }
@@ -124,6 +131,9 @@ dependencies {
     implementation project(":quickjs")
     implementation 'net.sourceforge.streamsupport:android-retrofuture:1.7.4'
 
+    implementation('org.xwalk:xwalk_shared_library:23.53.589.4') {
+        exclude group: 'com.android.support'
+    }
     implementation 'com.lzy.net:okgo:3.0.4'
     // implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
     implementation 'com.owen:tv-recyclerview:3.0.0'
@@ -139,7 +149,7 @@ dependencies {
     //标题栏
     implementation 'com.github.getActivity:TitleBar:10.5'
     //弹窗
-    implementation 'com.github.li-xiaojun:XPopup:2.10.0'
+    implementation 'com.github.li-xiaojun:XPopup:2.9.19'
     //工具类
     implementation 'com.blankj:utilcodex:1.31.0'
     //阴影/shape/选择器/圆角/...
@@ -163,6 +173,4 @@ dependencies {
     implementation project(":crash")
     //dlna投屏
     implementation 'com.github.devin1014.DLNA-Cast:dlna-dmc:V1.0.0'
-    // Lifecycles only (without ViewModel or LiveData)
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
 }
