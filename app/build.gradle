@@ -1,3 +1,15 @@
+// 👇 加在最上面，强行指定仓库地址
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    // 这是阿里云的公共镜像，包含了大量原本在 JCenter 里的老包
+    maven { url 'https://maven.aliyun.com/repository/public' }
+    maven { url 'https://maven.aliyun.com/repository/google' }
+}
+
+plugins {
+    // ... 原有代码 ...
+}
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 
