@@ -14,16 +14,27 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          
+      # 👇 新增：指定使用 Java 17，防止因为云端 Java 版本过新导致崩溃
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Build With Gradle
         run: |
           chmod +x gradlew
-          ./gradlew assemblerelease --build-cache --parallel --daemon --warning-mode all
+          # 👇 修正了 assembleRelease 的大小写
+          ./gradlew assembleRelease --build-cache --parallel --daemon --warning-mode all
+          
       - name: Prepare App
         run: |
           mkdir -p ${{ github.workspace }}/apk/
           for file in `find ~ -name "*.apk" -print`; do
             mv "$file" ${{ github.workspace }}/apk/
           done
+          
       - name: Upload App To Artifact
         uses: actions/upload-artifact@v4
         with:
