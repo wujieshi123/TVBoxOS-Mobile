@@ -1,86 +1,92 @@
-package com.github.tvbox.osc.ui.activity
+package com.github.tvbox.osc.ui.activity;
 
-import android.os.Process
-import android.view.MenuItem
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentPagerAdapter
-import androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener
-import com.blankj.utilcode.util.ActivityUtils
-import com.blankj.utilcode.util.ToastUtils
-import com.github.tvbox.osc.base.BaseVbActivity
-import com.github.tvbox.osc.constant.IntentKey
-import com.github.tvbox.osc.databinding.ActivityMainBinding
-import com.github.tvbox.osc.ui.fragment.GridFragment
-import com.github.tvbox.osc.ui.fragment.HomeFragment
-import com.github.tvbox.osc.ui.fragment.MyFragment
-import kotlin.system.exitProcess
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
-class MainActivity : BaseVbActivity<ActivityMainBinding>() {
+import android.content.Intent;
+import android.os.Bundle;
 
-    var fragments = listOf(HomeFragment(),MyFragment())
-    var useCacheConfig = false
-    private var exitTime = 0L
+import com.blankj.utilcode.util.ActivityUtils;
+import com.blankj.utilcode.util.ToastUtils;
+import com.github.tvbox.osc.base.BaseLazyFragment;
+import com.github.tvbox.osc.base.BaseVbActivity;
+import com.github.tvbox.osc.databinding.ActivityMainBinding;
+import com.github.tvbox.osc.ui.fragment.GridFragment;
+import com.github.tvbox.osc.ui.fragment.HomeFragment;
+import com.github.tvbox.osc.ui.fragment.MyFragment;
 
-    override fun init() {
+import java.util.ArrayList;
+import java.util.List;
 
-        useCacheConfig = intent.extras?.getBoolean(IntentKey.CACHE_CONFIG_CHANGED, false)?:false
+public class MainActivity extends BaseVbActivity<ActivityMainBinding> {
 
-        mBinding.vp.adapter = object : FragmentPagerAdapter(supportFragmentManager) {
-            override fun getItem(position: Int): Fragment {
-                return fragments[position]
-            }
+    List<Fragment> fragments = new ArrayList<>();
 
-            override fun getCount(): Int {
-                return fragments.size
-            }
+    public boolean useCacheConfig = false;
+
+    @Override
+    protected void init() {
+        useCacheConfig = false;
+        Intent intent = getIntent();
+        if (intent != null && intent.getExtras() != null) {
+            Bundle bundle = intent.getExtras();
+            useCacheConfig = bundle.getBoolean("useCache", false);
         }
 
-        mBinding.bottomNav.setOnNavigationItemSelectedListener { menuItem: MenuItem ->
-            mBinding.vp.setCurrentItem(menuItem.order, false)
-            true
-        }
-        mBinding.vp.addOnPageChangeListener(object : SimpleOnPageChangeListener() {
-            override fun onPageSelected(position: Int) {
-                mBinding.bottomNav.menu.getItem(position).setChecked(true)
+        initVp();
+        mBinding.bottomNav.setOnNavigationItemSelectedListener(menuItem -> {
+            mBinding.vp.setCurrentItem(menuItem.getOrder(), false);
+            return true;
+        });
+        mBinding.vp.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                mBinding.bottomNav.getMenu().getItem(position).setChecked(true);
             }
-        })
+        });
     }
 
-    override fun onBackPressed() {
-        if (mBinding.vp.currentItem == 1) {
-            mBinding.vp.currentItem = 0
-            return
-        }
-        val homeFragment = fragments[0] as HomeFragment
-        if (!homeFragment.isAdded) { // 资源不足销毁重建时未挂载到activity时getChildFragmentManager会崩溃
-            confirmExit()
-            return
-        }
-        val childFragments = homeFragment.allFragments
-        if (childFragments.isEmpty()) { //加载中(没有tab)
-            confirmExit()
-            return
-        }
-        val fragment: Fragment = childFragments[homeFragment.tabIndex]
-        if (fragment is GridFragment) { // 首页数据源动态加载的tab
-            if (!fragment.restoreView()) { // 有回退的view,先回退(AList等文件夹列表),没有可回退的,返到主页tab
-                if (!homeFragment.scrollToFirstTab()) {
-                    confirmExit()
-                }
+    private void initVp() {
+        fragments.add(new HomeFragment());
+        fragments.add(new MyFragment());
+        mBinding.vp.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+            @NonNull
+            @Override
+            public Fragment getItem(int position) {
+                return fragments.get(position);
             }
-        } else {
-            confirmExit()
+
+            @Override
+            public int getCount() {
+                return fragments.size();
+            }
+        });
+        mBinding.vp.setOffscreenPageLimit(fragments.size());
+    }
+
+    private long exitTime = 0L;
+
+    @Override
+    public void onBackPressed() {
+        if (mBinding.vp.getCurrentItem() == 1) {
+            mBinding.vp.setCurrentItem(0);
+            return;
+        }
+            confirmExit();
         }
     }
 
-    private fun confirmExit() {
+    private void confirmExit() {
         if (System.currentTimeMillis() - exitTime > 2000) {
-            ToastUtils.showShort("再按一次退出程序")
-            exitTime = System.currentTimeMillis()
+            ToastUtils.showShort("再按一次退出程序");
+            exitTime = System.currentTimeMillis();
         } else {
-            ActivityUtils.finishAllActivities(true)
-            Process.killProcess(Process.myPid())
-            exitProcess(0)
+            ActivityUtils.finishAllActivities(true);
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(0);
         }
     }
+
 }
